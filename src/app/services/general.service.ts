@@ -8,6 +8,7 @@ import { GetSubCategoryIndexDto } from '../models/subCategory.model';
 import { PaginationResponse } from '../models/pagination.model';
 import { GetProductByCategory, GetProductForInvoice } from '../models/product.model';
 import { GetSettings } from '../models/settings.model';
+import { AddOrderDto, AddOrderResponse } from '../models/order.model';
 
 @Injectable({
   providedIn: 'root'
@@ -64,5 +65,13 @@ export class GeneralService {
   getAllSettings$ = this.#refreshSettings.pipe(
     switchMap( _ => this._http.get<GetSettings>(`${this.api}/Settings/GetMainSettings`).pipe(shareReplay(1)))
   )
+
+  tax$ = this.getAllSettings$.pipe(
+    map(data => data.additionalValue),
+  )
+
+  createOrder(order: AddOrderDto) {
+    return this._http.post<AddOrderResponse>(`${this.api}/Orders/Create`, order);
+  }
 
 }

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject } from 'rxjs';
 import { AddOrderBeneficiaries, ClientForInvoice } from '../models/client.model';
 
@@ -21,10 +22,10 @@ export class ClientActionService {
     this.#clinetId.next(clientId)
   }
 
-  private clientBeneficiaries = new BehaviorSubject<AddOrderBeneficiaries[]>([])
-  clientBeneficiaries$ = this.clientBeneficiaries.asObservable()
+  #clientBeneficiaries = new BehaviorSubject<AddOrderBeneficiaries[]>([])
+  clientBeneficiaries$ = this.#clientBeneficiaries.asObservable()
   setOrderBeneficiaries(beneficiaries: AddOrderBeneficiaries[]) {
-    this.clientBeneficiaries.next(beneficiaries)
+    this.#clientBeneficiaries.next(beneficiaries)
   }
 
 }

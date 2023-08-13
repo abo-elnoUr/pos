@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
+import { PriceActionService } from './services/price-action.service';
 
 @Component({
   selector: 'app-root',

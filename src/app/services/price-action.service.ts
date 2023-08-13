@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, shareReplay } from 'rxjs';
+import { Express } from '../models/product.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +15,30 @@ export class PriceActionService {
     this.#paid.next(paid)
   }
 
-  private isUrgent = new BehaviorSubject<boolean>(false)
-  isUrgent$ = this.isUrgent.asObservable()
-  changeUrgentStatus(isUrgent: boolean) {
-    this.isUrgent.next(isUrgent)
+  #isUrgent = new BehaviorSubject<boolean>(false)
+  isUrgent$ = this.#isUrgent.asObservable()
+  setUrgentStatus(isUrgent: boolean) {
+    this.#isUrgent.next(isUrgent)
+  }
+
+  #express = new BehaviorSubject<Express>(null)
+  express$ = this.#express.asObservable().pipe(
+    shareReplay(1)
+  )
+  setExpress(express: Express){
+    this.#express.next(express);
+  }
+
+  #discount = new BehaviorSubject<number>(0)
+  discount$ = this.#discount.asObservable()
+  setDiscount(discountValue: number) {
+    this.#discount.next(discountValue)
+  }
+
+  #discountFixed = new BehaviorSubject<number>(0)
+  discountFixed$ = this.#discountFixed.asObservable()
+  setDiscountFixed(discountValue: number) {
+    this.#discountFixed.next(discountValue)
   }
 
 }
