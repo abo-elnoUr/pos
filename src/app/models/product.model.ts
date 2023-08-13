@@ -40,3 +40,28 @@ export interface Express {
   expressDate: number;
   price: number
 }
+
+
+export interface Product {
+  productId: string
+  productName: string
+  serviceId: string
+  price: number
+  arrange: GetProductArrange
+  additions: GetProductAddition[]
+  additionAmount: number
+  arrangeAmount: number
+  arrangeId: string
+}
+
+export type ActionType = 'add' | 'update' | 'delete' | 'clear'
+
+export interface CartItem {
+  product: Product
+  quntity: number
+}
+
+export interface Items {
+  item: CartItem
+  action: ActionType
+}

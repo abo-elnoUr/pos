@@ -3,34 +3,10 @@ import { ClientActionService } from './client-action.service';
 import { DeliveryActionService } from './delivery-action.service';
 import { OrderActionService } from './order-action.service';
 import { PriceActionService } from './price-action.service';
-import { ProductActionService } from './product-action.service';
 import { BehaviorSubject, combineLatest, map, reduce, shareReplay, take } from 'rxjs';
-import { GetProductAddition, GetProductArrange } from '../models/product.model';
 import { GeneralService } from './general.service';
+import { CartItem, Items, Product } from '../models/product.model';
 
-export interface Product {
-  productId: string
-  productName: string
-  serviceId: string
-  price: number
-  arrange: GetProductArrange
-  additions: GetProductAddition[]
-  additionAmount: number
-  arrangeAmount: number
-  arrangeId: string
-}
-
-type ActionType = 'add' | 'update' | 'delete' | 'clear'
-
-export interface CartItem {
-  product: Product
-  quntity: number
-}
-
-export interface Items {
-  item: CartItem
-  action: ActionType
-}
 
 
 @Injectable({
@@ -43,7 +19,6 @@ export class CartActionService {
     private _deliveryAction: DeliveryActionService,
     private _orderAction: OrderActionService,
     private _priceAction: PriceActionService,
-    private _productAction: ProductActionService,
     private _generalService: GeneralService
   ) { }
 
