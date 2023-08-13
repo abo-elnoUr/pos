@@ -6,7 +6,9 @@ import { isSignInGuard } from './core/guard/is-sign-in.guard';
 
 const routes: Routes = [
   { path: '', pathMatch:'full', redirectTo: 'login' },
-  { path: 'login', component: LoginComponent, canActivate: [isSignInGuard] },
+  { path: 'login', component: LoginComponent,
+   canActivate: [isSignInGuard]
+  },
   {
     path: 'pos',
     canActivate: [authGuard],

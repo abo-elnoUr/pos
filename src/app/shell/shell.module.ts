@@ -8,7 +8,8 @@ import { PosCategoryComponent } from './pos-shell/pos-category/pos-category.comp
 import { PosSubCategoryComponent } from './pos-shell/pos-sub-category/pos-sub-category.component';
 import { PosProductComponent } from './pos-shell/pos-product/pos-product.component';
 import { CartComponent } from './pos-shell/cart/cart.component';
-
+import { NgSelectModule } from '@ng-select/ng-select';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,9 @@ import { CartComponent } from './pos-shell/cart/cart.component';
   ],
   imports: [
     CommonModule,
-    ShellRoutingModule
+    ShellRoutingModule,
+    NgSelectModule,
+    FormsModule
   ]
 })
 export class ShellModule { }

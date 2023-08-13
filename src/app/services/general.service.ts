@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject, } from '@angular/core';
 import { environment } from 'src/environments/environment.development';
 import { ClientSearchResponse } from '../models/client.model';
 import { GetCategoryDropDown } from '../models/category.model';
-import { BehaviorSubject, map, shareReplay, switchMap } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, map, of, shareReplay, switchMap } from 'rxjs';
 import { GetSubCategoryIndexDto } from '../models/subCategory.model';
 import { PaginationResponse } from '../models/pagination.model';
 import { GetProductByCategory, GetProductForInvoice } from '../models/product.model';
@@ -17,17 +17,17 @@ export class GeneralService {
 
   api = `${environment.ApiUrl}`;
 
-  constructor(private _http: HttpClient) { }
+  _http = inject(HttpClient);
 
   getClientForInvoice(phone: string) {
     return this._http.get<ClientSearchResponse>(`${this.api}/Clients/SearchForInvoice/${phone}`);
   }
 
-  getAllDropDownCategories() {
-    return this._http.get<GetCategoryDropDown[]>(`${this.api}/Categories/GetAllDropDown`);
-  }
+  // category
 
-  private selectedCategorySubject = new BehaviorSubject<string>('');
+  categories$ = this._http.get<GetCategoryDropDown[]>(`${this.api}/Categories/GetAllDropDown`).pipe(map(data => data), shareReplay(1));
+
+  private selectedCategorySubject = new BehaviorSubject<string>(null);
   selectedCategory$ = this.selectedCategorySubject.asObservable();
 
   categorySelected$ = this.selectedCategory$.pipe(
@@ -49,22 +49,47 @@ export class GeneralService {
     this.selectedCategorySubject.next(categoryId);
   }
 
+
+
   // product
 
   getProductForInvoice(filter: GetProductByCategory) {
     return this._http.post<PaginationResponse<GetProductForInvoice>>(`${this.api}/Products/GetProductForInvoice`, filter);
   }
 
-  // settings
-
-  #refreshSettings = new BehaviorSubject<void>(undefined)
-  refreshSettings() {
-    this.#refreshSettings.next()
+  #subCategoryId = new ReplaySubject<string>();
+  selectedSubCategoryId$ = this.#subCategoryId.asObservable();
+  #selectedSubCategory = new ReplaySubject<GetSubCategoryIndexDto>();
+  selectedSubCategory$ = this.#selectedSubCategory.asObservable();
+  subCategorySelected(category: GetSubCategoryIndexDto) {
+    this.#selectedSubCategory.next(category);
+    this.#subCategoryId.next(category.id)
   }
 
-  getAllSettings$ = this.#refreshSettings.pipe(
-    switchMap( _ => this._http.get<GetSettings>(`${this.api}/Settings/GetMainSettings`).pipe(shareReplay(1)))
+  subCategorySelected$ = this.selectedSubCategory$.pipe(
+    switchMap(({id}) =>
+      id ?
+        this._http.post<PaginationResponse<GetProductForInvoice>>(`${this.api}/GetProductForInvoice`, {pageNumber: 1, pageSize: 100, categoryId: id})
+          .pipe(
+            map(data => data.data),
+          )
+        : of(null)
+      ),
+      shareReplay(1)
   )
+
+  isOther$ = this.selectedSubCategory$.pipe(
+    map(({isOther}) => isOther),
+  )
+  showAddition$ = this.selectedSubCategory$.pipe(
+    map(({showAddition}) => showAddition),
+  )
+  showArrange$ = this.selectedSubCategory$.pipe(
+    map(({showArrange}) => showArrange),
+  )
+
+
+  getAllSettings$ = this._http.get<GetSettings>(`${this.api}/Settings/GetMainSettings`).pipe(shareReplay(1));
 
   tax$ = this.getAllSettings$.pipe(
     map(data => data.additionalValue),

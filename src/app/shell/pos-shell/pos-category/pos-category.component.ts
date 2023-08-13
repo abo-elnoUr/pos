@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { GeneralService } from 'src/app/services/general.service';
 
 @Component({
   selector: 'app-pos-category',
@@ -6,5 +7,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./pos-category.component.css']
 })
 export class PosCategoryComponent {
+
+  #general = inject(GeneralService)
+
+  categories$ = this.#general.categories$
+
+  setCategory(categoryId: string) {
+    this.#general.categorySelected(categoryId)
+  }
 
 }

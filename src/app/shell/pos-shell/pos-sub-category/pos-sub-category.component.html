@@ -1,1 +1,11 @@
-<p>pos-sub-category works!</p>
+<h2 class="ms-3">Sub Category</h2>
+<div class="row py-2 m-2">
+  <div class="col-lg-2 col-md-3 col-sm-6" *ngFor="let sub of subCategories$ | async">
+    <div (click)="getProducts(sub)" class="card text-center mb-2" style="width: 160px; cursor: pointer;">
+      <div class="card-body">
+        <p class="card-text">{{sub.name}}</p>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>

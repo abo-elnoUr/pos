@@ -1,1 +1,53 @@
-<p>pos-product works!</p>
+<h2 class="ms-2">Products</h2>
+<div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Product</th>
+        <th scope="col" *ngIf="showAddition$ | async">Additions</th>
+        <th scope="col" *ngIf="showArrange$ | async">Arranges</th>
+        <th scope="col" *ngIf="isOther$ | async">Price</th>
+        <th scope="col">Add To Cart</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let product of products$ | async">
+        <th>{{ product.productName }}</th>
+        <td style="max-width: 10rem;">
+          <ng-select [items]="product.additions" [multiple]="true" bindLabel="additionName"
+          [selectableGroup]="true" [closeOnSelect]="false" placeholder="choose Additions">
+          <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
+            <input id="item-{{index}}" type="checkbox" [ngModelOptions]="{standalone: true}" [ngModel]="item$.selected" />
+            {{item.additionName | uppercase}}
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+            <input id="item-{{index}}" type="checkbox" [ngModelOptions]="{standalone: true}" [ngModel]="item$.selected" />
+            {{item.additionName}}
+          </ng-template>
+        </ng-select>
+        </td>
+        <td *ngIf="showArrange$ | async">
+          <select [(ngModel)]="selectedArrange" class="form-select form-select-sm m-auto ">
+            <option [ngValue]="null" selected>No ArrangeType</option>
+            <option [ngValue]="arrange" *ngFor="let arrange of product.arranges">{{arrange.arrangeName}}</option>
+          </select>
+        </td>
+        <td *ngIf="isOther$ | async" class="w-25">
+          <input [disabled]="!product?.changePrice" min="0" type="number" class="form-control"
+            (change)="product.price = +$any($event.target).value " [value]="product.price">
+        </td>
+        <td>
+          <span>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="addToCart(product)"
+            >
+              Add To Cart
+            </button>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

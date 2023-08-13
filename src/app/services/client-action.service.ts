@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject } from 'rxjs';
-import { AddOrderBeneficiaries, ClientForInvoice } from '../models/client.model';
+import { ClientSearchResponse, GetClientBeneficiariesDto } from '../models/client.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,21 +10,21 @@ export class ClientActionService {
 
   constructor() { }
 
-  #clientForInvoice = new BehaviorSubject<ClientForInvoice>({clientId: '', collectionLimit: 0, balance: 0})
+  #clientForInvoice = new BehaviorSubject<ClientSearchResponse | null>(undefined)
   clientForInvoice$ = this.#clientForInvoice.asObservable()
-  setClientForInvoice(client: ClientForInvoice) {
+  setClientForInvoice(client: ClientSearchResponse) {
     this.#clientForInvoice.next(client)
   }
 
-  #clinetId = new BehaviorSubject<string>('')
+  #clinetId = new BehaviorSubject<string>(null)
   clientId$ = this.#clinetId.asObservable()
   setClientId(clientId: string) {
     this.#clinetId.next(clientId)
   }
 
-  #clientBeneficiaries = new BehaviorSubject<AddOrderBeneficiaries[]>([])
+  #clientBeneficiaries = new BehaviorSubject<GetClientBeneficiariesDto[]>([])
   clientBeneficiaries$ = this.#clientBeneficiaries.asObservable()
-  setOrderBeneficiaries(beneficiaries: AddOrderBeneficiaries[]) {
+  setOrderBeneficiaries(beneficiaries: GetClientBeneficiariesDto[]) {
     this.#clientBeneficiaries.next(beneficiaries)
   }
 

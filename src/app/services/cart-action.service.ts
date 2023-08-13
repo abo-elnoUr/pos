@@ -158,6 +158,7 @@ export class CartActionService {
   cart$ = combineLatest({
     clientId: this._clientAction.clientId$,
     orderNumber: this._orderAction.orderId$,
+    details: this.cartItems$,
     paid: this._priceAction.paid$,
     isUrgent: this._priceAction.isUrgent$,
     delivery: this._deliveryAction.delivery$,
@@ -168,7 +169,6 @@ export class CartActionService {
     tax: this.tax$,
     discount: this.discount$,
     netTotal: this.netTotal$,
-    details: this.cartItems$
   }).pipe(take(1))
 
 

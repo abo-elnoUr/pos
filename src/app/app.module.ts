@@ -4,8 +4,9 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-roting.module';
 import { LoginComponent } from './login/login.component';
-import { AuthService } from './login/auth.service';
 import { JwtInterceptor } from './core/interceptor/jwt.interceptor';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -15,9 +16,12 @@ import { JwtInterceptor } from './core/interceptor/jwt.interceptor';
   imports: [
     BrowserModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    NgbModule,
+    ReactiveFormsModule,
   ],
-  providers: [AuthService,
+  providers: [
+
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

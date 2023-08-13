@@ -10,9 +10,9 @@ export class ProductActionService {
 
   constructor(private _http: HttpClient) { }
 
-  #productForInvoice = new BehaviorSubject<GetProductForInvoice>({ productId: '', productName: '', price: 0, serviceId: '', changePrice: false, updateQuantity: false, additions: [], arranges: [] })
+  #productForInvoice = new BehaviorSubject<GetProductForInvoice[] | null>(null)
   productForInvoice$ = this.#productForInvoice.asObservable()
-  setProductForInvoice(product: GetProductForInvoice) {
+  setProductForInvoice(product: GetProductForInvoice[]) {
     this.#productForInvoice.next(product)
   }
 
