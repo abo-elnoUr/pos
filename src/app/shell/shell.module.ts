@@ -9,7 +9,7 @@ import { PosSubCategoryComponent } from './pos-shell/pos-sub-category/pos-sub-ca
 import { PosProductComponent } from './pos-shell/pos-product/pos-product.component';
 import { CartComponent } from './pos-shell/cart/cart.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -24,7 +24,8 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     ShellRoutingModule,
     NgSelectModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class ShellModule { }

@@ -1,1 +1,264 @@
-<p>cart works!</p>
+<h2 class="ms-2">Cart</h2>
+<div class="py-2 m-2">
+  <div class="text-center my-2">
+    <h4>Total : {{ (total$ | async) ?? 0 }}</h4>
+  </div>
+  <div style="height: 300px; overflow-y: scroll;">
+
+    <table class="table text-center">
+      <thead>
+        <tr>
+          <th scope="col-2">Item</th>
+          <th scope="col">Price</th>
+          <th scope="col">Additions</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="items$ | async; else noItems">
+          <tr *ngFor="let item of items$ | async">
+            <td>{{ item.product.productName }} {{
+              item.product.arrange?.arrangeName }}</td>
+            <td>
+              {{ item.product.price | currency }}
+            </td>
+            <td>
+              {{ item.product.additionAmount | currency }}
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary"
+                (click)="decreaseQuantity(item)">-</button>
+              {{ item.quntity }}
+              <button class="btn btn-sm btn-outline-primary"
+                (click)="increaseQuantity(item)">+</button>
+            </td>
+            <td>
+              {{ (item.product.price + item.product.additionAmount +
+              item.product.arrangeAmount) * item.quntity | currency }}
+              <button class="btn btn-sm btn-danger" (click)="deleteItem(item)">Del</button>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-template #noItems>
+          <div class=" text-center mt-3">
+            <span class="text-light bg-primary fw-bold p-2 rounded">
+              Please select items
+            </span>
+          </div>
+
+        </ng-template>
+
+      </tbody>
+    </table>
+  </div>
+  <hr>
+  <table class="table text-center">
+    <thead>
+      <tr>
+        <th scope="col-2">Net Total</th>
+        <th scope="col" *ngIf="totalExpress$ | async">Express</th>
+        <th scope="col" *ngIf="deliveryCost$ | async">Delivery</th>
+        <th scope="col">Tax</th>
+        <th scope="col">Discount</th>
+        <th scope="col">Paid</th>
+        <th scope="col">Remaining</th>
+      </tr>
+    </thead>
+    <tbody>
+      <td>{{ (netTotal$ | async ) ?? 0 | currency }}</td>
+      <td *ngIf="totalExpress$ | async">{{ (totalExpress$ | async) ?? 0 |
+        currency }}</td>
+      <td *ngIf="deliveryCost$ | async">{{ (deliveryCost$ | async) ?? 0 |
+        currency }}</td>
+      <td>{{ (tax$ | async) ?? 0 | currency}}</td>
+      <td>
+        {{ (discount$ | async) ?? 0 | currency }}
+      </td>
+      <td>{{ (paid$ | async ) ?? 0 | currency }}</td>
+      <td>{{ (remaining$ | async ) ?? 0 | currency }}</td>
+    </tbody>
+  </table>
+  <hr>
+  <div class="d-flex justify-content-between gap-1 text-center">
+    <span class="d-flex flex-column p-1"
+      *ngIf="expressUrgent$ | async as urgent">
+      <small class="text-muted fw-bold">urgent</small>
+      <div class="form-check form-switch">
+        <input class="form-check-input"
+          [checked]="(express$ | async)?.expressValue == expressEnum.URGENT"
+          (click)="changeExpressUrgent(urgent, $any($event.target).checked)"
+          type="checkbox" role="switch">
+      </div>
+    </span>
+    <span class="express bg-warning p-1 rounded">
+      <small class="text-muted fw-bold">express</small>
+      <div class="d-flex justify-content-center gap-1">
+
+        <ng-container *ngIf="express1$ | async as express1">
+          <input type="radio" name="express"   class="form-check-input" id="ex1"
+            (click)="changeExpress(express1)">
+          <label for="ex1">1</label>
+        </ng-container>
+
+        <ng-container *ngIf="express2$ | async as express2">
+          <input type="radio" name="express"   class="form-check-input" id="ex2"
+            (click)="changeExpress(express2)">
+          <label for="ex2">2</label>
+        </ng-container>
+
+        <ng-container *ngIf="express3$ | async as express3">
+          <input type="radio" name="express"   class="form-check-input" id="ex3"
+            (click)="changeExpress(express3)">
+          <label for="ex3">3</label>
+        </ng-container>
+
+        <ng-container *ngIf="normalExpress$ | async as normal ">
+          <input type="radio" name="express"   class="form-check-input" id="cls"
+            (click)="clearExpress(normal)">
+          <label for="cls">cls</label>
+        </ng-container>
+
+      </div>
+    </span>
+    <span class="discount bg-warning p-1 rounded">
+      <small class="text-muted fw-bold">discount</small>
+      <div class="d-flex justify-content-center gap-1">
+        <input type="radio" name="express" class="form-check-input" id="ds1"
+          (click)="changePercentageDiscount(10)">
+        <label for="ds1">10%</label>
+        <input type="radio" name="express" class="form-check-input" id="ds2"
+          (click)="changePercentageDiscount(20)">
+        <label for="ds2">20%</label>
+        <input type="radio" name="express" (click)="clearDiscount()"
+          class="form-check-input" id="cls">
+        <label for="cls">cls</label>
+      </div>
+    </span>
+    <span class="d-flex flex-column p-1">
+      <small class="text-muted fw-bold">discount(%)</small>
+      <input type="number" [(ngModel)]="percentDiscount" class="form-control"
+        (input)="changePercentageDiscount($any($event.target).value)">
+    </span>
+    <span class="d-flex flex-column p-1">
+      <small class="text-muted fw-bold">discount(fixed)</small>
+      <input type="number" [(ngModel)]="fixedDiscount" class="form-control"
+        (input)="changeFixedDiscount($any($event.target).value)">
+    </span>
+  </div>
+  <hr>
+  <div class="date-delivery d-flex justify-content-between">
+    <div>
+      <input type="datetime-local" class="form-control"
+        [(ngModel)]="dateDelivery"
+        [value]="getDelivryDate(deliveryDate$ | async)">
+    </div>
+    <div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox"
+          [checked]="(deliveryAmount$ | async) > 0"
+          (click)="openDelivery(deliveryModal, $any($event.target).checked)"
+          value id="flexCheckIndeterminate">
+        <label class="form-check-label" for="flexCheckIndeterminate">
+          delivery
+        </label>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="d-flex justify-content-center">
+    <div class="print d-flex">
+      <div class="d-flex flex-column">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="printOptions"
+            id="customerAndShopCopy">
+          <label class="form-check-label" for="customerAndShopCopy">Customer&ShopCopy</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" name="printOptions"
+            type="radio" id="cutsomerCopy">
+          <label class="form-check-label" for="cutsomerCopy">Customer Copy</label>
+        </div>
+      </div>
+      <div class="d-flex flex-column">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="printOptions"
+            id="ShopCopy">
+          <label class="form-check-label" for="ShopCopy">Shop Copy</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" [checked]="true" name="printOptions"
+            type="radio" id="noCopy">
+          <label class="form-check-label" for="noCopy">No Copy</label>
+        </div>
+      </div>
+    </div>
+    <div class="tags">
+      <input type="number" class="form-control"
+        placeholder="enter number of tags">
+    </div>
+  </div>
+  <hr>
+  <div class="paid row" [formGroup]="paidForm" >
+    <div class="col-lg-4">
+      <small class="text-muted fw-bold">paid</small>
+      <input type="number" formControlName="paid" class="form-control"
+        (change)="getPaidAmount($any($event.target).value)">
+    </div>
+    <div class="col-lg-4">
+      <small class="text-muted fw-bold">payment method</small>
+      <div class="d-flex flex-column">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" (change)="checkPaymentMethod()" formControlName="paymentMethod"  [value]="paymentEnum.Visa" type="radio"  id="visa">
+          <label class="form-check-label" for="visa">Visa</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" (change)="checkPaymentMethod()" formControlName="paymentMethod" [value]="paymentEnum.Cash"
+            type="radio" id="cash">
+          <label class="form-check-label" for="cash">Cash</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" (change)="checkPaymentMethod()" formControlName="paymentMethod" [value]="paymentEnum.Balance"
+            type="radio" id="banalce">
+          <label class="form-check-label" for="banalce">Balance</label>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <button class="btn btn-outline-warning" (click)="submit()" >Submit</button>
+    </div>
+  </div>
+</div>
+
+<ng-template #deliveryModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">delivery</h4>
+    <button type="button" class="btn-close" aria-label="Close"
+      (click)="modal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <form>
+      <div class="mb-3">
+        <label for="area">Select Area</label>
+        <ng-select
+          [items]="listOfArea$ | async"
+          (change)="chooseArea($event)"
+          bindLabel="areaName"></ng-select>
+      </div>
+      <div class="mb-3">
+        <label for="area">Enter Address</label>
+        <input (change)="addAddress($any($event.target).value)"
+          class="form-control" type="text" />
+      </div>
+      <div class="mb-3">
+        <label for="area">Add Delivery Cost</label>
+        <input [(ngModel)]="cost" [ngModelOptions]="{standalone: true}"
+          class="form-control" type="number" />
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark"
+      (click)="addDelivery();modal.close('Save click')">Save</button>
+  </div>
+</ng-template>

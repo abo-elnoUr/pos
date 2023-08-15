@@ -61,3 +61,9 @@ export interface OrderStatusName {
   valueEn: string;
   valueAr: string;
 }
+
+export interface AddAreaDto {
+  id: string;
+  areaName: string;
+  shippingCharges: number;
+}

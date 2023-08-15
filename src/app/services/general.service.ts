@@ -7,7 +7,7 @@ import { BehaviorSubject, ReplaySubject, map, of, shareReplay, switchMap } from 
 import { GetSubCategoryIndexDto } from '../models/subCategory.model';
 import { PaginationResponse } from '../models/pagination.model';
 import { GetProductByCategory, GetProductForInvoice } from '../models/product.model';
-import { GetSettings } from '../models/settings.model';
+import { AddAreaDto, GetSettings } from '../models/settings.model';
 import { AddOrderDto, AddOrderResponse } from '../models/order.model';
 
 @Injectable({
@@ -93,6 +93,13 @@ export class GeneralService {
 
   tax$ = this.getAllSettings$.pipe(
     map(data => data.additionalValue),
+  )
+
+  listOfAreas$ = this._http.post<PaginationResponse<AddAreaDto>>(`${this.api}/Areas/GetAll`, {
+    pageNumber: 1,
+    pageSize: 100,
+  }).pipe(
+    map(d => d.data)
   )
 
   createOrder(order: AddOrderDto) {

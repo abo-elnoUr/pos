@@ -3,7 +3,7 @@ import { ClientActionService } from './client-action.service';
 import { DeliveryActionService } from './delivery-action.service';
 import { OrderActionService } from './order-action.service';
 import { PriceActionService } from './price-action.service';
-import { BehaviorSubject, combineLatest, map, reduce, shareReplay, take } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, map, reduce, scan, shareReplay, take, tap } from 'rxjs';
 import { GeneralService } from './general.service';
 import { CartItem, Items, Product } from '../models/product.model';
 
@@ -54,23 +54,23 @@ export class CartActionService {
   }
 
   cartItems$ = this.items$.pipe(
-    reduce((acc, cur) => this.cartOpreation(acc, cur), [] as CartItem[]),
+    filter(items => !!items),
+    scan((acc, cur) => this.cartOpreation(acc, cur), [] as CartItem[]),
     shareReplay(1)
   )
 
-  cartOpreation(items: CartItem[], opreations: Items) {
-
+  cartOpreation(items: CartItem[], opreations: Items): CartItem[] {
     const { item, action } = opreations
     let found = false
     switch (action) {
       case 'add':
         items.forEach(i => {
           if (i.product.productId == item.product.productId &&
-            i.product.additions.length == item.product.additions.length &&
             i.product.serviceId == item.product.serviceId &&
+            i.product.additions.length == item.product.additions.length &&
             i.product.additions.every((v, _) => item.product.additions.includes(v))
           ) {
-            item.quntity++
+            i.quntity++
             found = true
           }
         })
@@ -82,7 +82,7 @@ export class CartActionService {
             i.product.additions.length == item.product.additions.length &&
             i.product.serviceId == item.product.serviceId &&
             i.product.additions.every((v, _) => item.product.additions.includes(v))
-          ) ? i : item
+          ) ? item : i
         )
       case 'delete':
         return items.filter(i =>
@@ -100,15 +100,23 @@ export class CartActionService {
 
   totalItem$ = this.cartItems$.pipe(
     map(items => items.reduce((acc, cur) =>
-      acc + (cur.quntity * cur.product.price + cur.product.additionAmount + cur.product.arrangeAmount), 0
-    ))
+      acc + (cur.quntity * Number(cur.product.price + cur.product.additionAmount + cur.product.arrange.price)), 0
+    )),
   )
 
   express$ = combineLatest([
     this.totalItem$,
     this._priceAction.express$
   ]).pipe(
-    map(([total, express]) => (total * express.price) - total),
+    map(([total, express]) => Math.round(total * (express?.price??1))),
+    shareReplay(1)
+  )
+
+  totalExpress$ = combineLatest([
+    this.totalItem$,
+    this._priceAction.express$
+  ]).pipe(
+    map(([total, express]) => Math.round(total * express?.price) - total),
     shareReplay(1)
   )
 
@@ -126,7 +134,7 @@ export class CartActionService {
     this._deliveryAction.delivery$,
     this.discount$
   ]).pipe(
-    map(([express, delivery, discount]) => (express + delivery.deliveryAmount) - discount),
+    map(([express, delivery, discount]) => (express + (delivery?.deliveryAmount??0)) - discount),
     shareReplay(1)
   )
 
@@ -142,7 +150,7 @@ export class CartActionService {
     this.total$,
     this.tax$
   ]).pipe(
-    map(([total, tax]) => total + tax),
+    map(([total, tax]) => total + tax ),
     shareReplay(1)
   )
 
@@ -165,7 +173,7 @@ export class CartActionService {
     deliverDate: this._deliveryAction.deliverDate$,
     beneficiaries: this._clientAction.clientBeneficiaries$,
     total: this.totalItem$,
-    express: this.express$,
+    express: this.totalExpress$,
     tax: this.tax$,
     discount: this.discount$,
     netTotal: this.netTotal$,

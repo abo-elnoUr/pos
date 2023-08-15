@@ -2,8 +2,12 @@
   <div class="col-lg-8 col-md-12 p-2 rounded bg-light" style="height: 100vh;">
     <app-client></app-client>
     <app-pos-category></app-pos-category>
-    <app-pos-sub-category></app-pos-sub-category>
+    <app-pos-sub-category style="max-height: 233px;
+    overflow-y: auto;
+    display: block;"></app-pos-sub-category>
     <app-pos-product></app-pos-product>
   </div>
-  <div class="col-lg-4 col-md-12 p-2 rounded bg-light">Cart</div>
+  <div class="col-lg-4 col-md-12 p-2 rounded bg-light">
+    <app-cart></app-cart>
+  </div>
 </div>

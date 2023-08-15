@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, map, tap } from 'rxjs';
 import { AddOrderDeliveryDto } from '../models/delivery.model';
 
 @Injectable({
@@ -31,12 +31,7 @@ export class DeliveryActionService {
     areaId: this.areaId$,
     address: this.address$,
     deliveryAmount: this.deliveryAmount$
-  }).pipe(
-    map(({areaId, address, deliveryAmount}) => {
-      if(!(areaId && address && deliveryAmount) )
-      return null
-    })
-  )
+  })
 
   private deliverDate = new BehaviorSubject<string>('');
   deliverDate$ = this.deliverDate.asObservable();

@@ -10,6 +10,7 @@ export interface GetProductForInvoice {
   productName: string;
   price: number;
   arranges: GetProductArrange[];
+  selectedAdditions: GetProductAddition[];
   additions: GetProductAddition[];
   changePrice?: boolean;
   updateQuantity?: boolean;
@@ -35,10 +36,11 @@ export interface AddProductAddition {
 
 export enum expressEnum { NORMAL, URGENT, EXPRESS1, EXPRESS2, EXPRESS3 }
 
+
 export interface Express {
   expressValue: expressEnum;
   expressDate: number;
-  price: number
+  price: number;
 }
 
 
@@ -47,11 +49,11 @@ export interface Product {
   productName: string
   serviceId: string
   price: number
+  arrangeId: string
   arrange: GetProductArrange
   additions: GetProductAddition[]
   additionAmount: number
   arrangeAmount: number
-  arrangeId: string
 }
 
 export type ActionType = 'add' | 'update' | 'delete' | 'clear'

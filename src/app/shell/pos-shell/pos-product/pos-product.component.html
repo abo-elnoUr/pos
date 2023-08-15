@@ -1,5 +1,6 @@
 <h2 class="ms-2">Products</h2>
-<div>
+
+
   <table class="table">
     <thead>
       <tr>
@@ -11,22 +12,25 @@
       </tr>
     </thead>
     <tbody>
+      <ng-container *ngIf="(products$ | async); else noProduct">
       <tr *ngFor="let product of products$ | async">
         <th>{{ product.productName }}</th>
-        <td style="max-width: 10rem;">
-          <ng-select [items]="product.additions" [multiple]="true" bindLabel="additionName"
-          [selectableGroup]="true" [closeOnSelect]="false" placeholder="choose Additions">
-          <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
-            <input id="item-{{index}}" type="checkbox" [ngModelOptions]="{standalone: true}" [ngModel]="item$.selected" />
-            {{item.additionName | uppercase}}
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-            <input id="item-{{index}}" type="checkbox" [ngModelOptions]="{standalone: true}" [ngModel]="item$.selected" />
-            {{item.additionName}}
-          </ng-template>
-        </ng-select>
+        <td *ngIf="showAddition$ | async" style="max-width: 10rem;">
+          <ng-select [multiple]="true" [items]="product.additions" [(ngModel)]="product.selectedAdditions" bindLabel="additionName"
+            [selectableGroup]="true" [closeOnSelect]="false" placeholder="choose Additions">
+            <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-{{index}}" type="checkbox" [ngModelOptions]="{standalone: true}" [ngModel]="item$.selected" />
+              {{item.additionName | uppercase}}
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-{{index}}" type="checkbox" [ngModelOptions]="{standalone: true}" [ngModel]="item$.selected" />
+              {{item.additionName}}
+            </ng-template>
+          </ng-select>
         </td>
-        <td *ngIf="showArrange$ | async">
+        <td *ngIf="showArrange$ | async" style="max-width: 5rem;">
+          <!-- <ng-select [items]="product.arranges" [(ngModel)]="selectedArrange" bindLabel="arrangeName" placeholder="choose Arrange">
+          </ng-select> -->
           <select [(ngModel)]="selectedArrange" class="form-select form-select-sm m-auto ">
             <option [ngValue]="null" selected>No ArrangeType</option>
             <option [ngValue]="arrange" *ngFor="let arrange of product.arranges">{{arrange.arrangeName}}</option>
@@ -48,6 +52,14 @@
           </span>
         </td>
       </tr>
+    </ng-container>
+    <ng-template #noProduct>
+      <div class="text-center mt-3">
+        <span class="bg-primary p-2 rounded fw-bold text-light">
+          No product Select Sub Category
+        </span>
+      </div>
+    </ng-template>
     </tbody>
   </table>
-</div>
+
