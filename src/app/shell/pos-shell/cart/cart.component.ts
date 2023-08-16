@@ -9,7 +9,8 @@ import { PriceActionService } from 'src/app/services/price-action.service';
 import { Express } from '../../../models/product.model';
 import { tap } from 'rxjs';
 import { FormControl, FormGroup } from '@angular/forms';
-import { PaymentMethod } from 'src/app/models/order.model';
+import { AddOrderDto, PaymentMethod } from 'src/app/models/order.model';
+import { ClientActionService } from 'src/app/services/client-action.service';
 
 
 @Component({
@@ -24,6 +25,7 @@ export class CartComponent {
   #priceAction = inject(PriceActionService)
   #general = inject(GeneralService)
   #deliveryAction = inject(DeliveryActionService)
+  #clientAction = inject(ClientActionService)
 
   total$ = this.#cartAction.express$
   totalItemsPrice$ = this.#cartAction.totalItem$
@@ -41,7 +43,8 @@ export class CartComponent {
   expressEnum = expressEnum
   expressUrgent$ = this.#priceAction.expressUrgent$
   normalExpress$ = this.#priceAction.expressNormal$.pipe(
-    tap(express => this.normalExpressValue = express)
+    tap(express => this.normalExpressValue = express),
+    tap(express => this.#priceAction.setDeliveryDate(express.expressDate))
   )
   express$ = this.#priceAction.express$
   totalExpress$ = this.#cartAction.totalExpress$
@@ -62,6 +65,34 @@ export class CartComponent {
     paid: new FormControl(0),
     paymentMethod: new FormControl(PaymentMethod.Cash)
   })
+  cart$ = this.#cartAction.cart$
+  order: AddOrderDto
+  noSubmit: boolean = false
+
+  clientBalance: number = 0
+  remainigMoney: number = 0
+  collectionLimit: number = 0
+  allRemainingMoney: number = 0
+  clientId: string
+
+  constructor() {
+    this.order = {
+      clientId: "",
+      oldOrderNumber: "",
+      express: 0,
+      total: 0,
+      discount: 0,
+      netTotal: 0,
+      deliverDate: "",
+      paymentMethod: this.paymentEnum.Cash,
+      isUrgent: false,
+      paid: 0,
+      details: [],
+      delivery: { areaId: "", deliveryAmount: 0, address: "" },
+      beneficiaries: []
+    }
+    this.checkPaymentMethod()
+  }
 
 
   increaseQuantity(item: CartItem) {
@@ -70,6 +101,10 @@ export class CartComponent {
 
   decreaseQuantity(item: CartItem) {
     this.#cartAction.updateCart(item.product, --item.quntity)
+    if(item.quntity == 0) {
+      this.#cartAction.deleteFromCart(item.product)
+    }
+
   }
 
   addUrgent() {
@@ -96,18 +131,8 @@ export class CartComponent {
   }
 
   getPaidAmount(amount: number) {
-    if(amount > 0) {
-      this.#priceAction.setPaid(amount)
-    }
-  }
-
-  checkPaymentMethod() {
-    let paymentType = this.paidForm.get('paymentMethod').value
-    if(paymentType == PaymentMethod.Balance) {
-      this.paidForm.get('paid').setValue(0)
-      this.paidForm.get('paid').disable()
-    } else {
-      this.paidForm.get('paid').enable()
+    if (+amount > 0) {
+      this.#priceAction.setPaid(+amount)
     }
   }
 
@@ -162,6 +187,12 @@ export class CartComponent {
     return this.date
   }
 
+  changeDeliveryDate(d: string) {
+    let dd = new Date(d)
+    let date = Math.floor(dd.getTime() / (60 * 60 * 1000))
+    this.#deliveryAction.changeDeliverDate(d)
+  }
+
   clearDeliveryData() {
     this.#deliveryAction.setAddress(null)
     this.#deliveryAction.setAreaId(null)
@@ -184,8 +215,87 @@ export class CartComponent {
       );
   }
 
+
+
+  checkPaymentMethod() {
+    let paymentType = this.paidForm.get('paymentMethod').value
+    if (paymentType == PaymentMethod.Balance) {
+      this.paidForm.get('paid').setValue(0)
+      this.paidForm.get('paid').disable()
+    }
+    else if (paymentType == PaymentMethod.Cash || paymentType == PaymentMethod.Visa) {
+      this.#clientAction.clientForInvoice$.subscribe({ next: client => this.clientBalance = client ? client.balance : 0 })
+      this.#general.collectionLimit$.subscribe(limit => {
+        this.collectionLimit = limit
+        this.allRemainingMoney = this.remainigMoney + (this.clientBalance < 0 ? this.clientBalance * -1 : this.clientBalance)
+      })
+      if (this.allRemainingMoney > this.collectionLimit) {
+        this.noSubmit = true
+        alert("client balance can not more than collection limit 😑")
+      } else {
+        this.noSubmit = false
+      }
+
+    } else {
+      this.paidForm.get('paid').enable()
+    }
+  }
+
+  checkForSubmit() {
+
+    this.#clientAction.clientId$.subscribe({
+      next: (id) => {
+        this.clientId = id
+      }
+    })
+
+    this.remaining$.subscribe({
+      next: (remaining) => {
+        this.remainigMoney = remaining
+      }
+    })
+
+    this.checkPaymentMethod()
+
+    if (this.remainigMoney < 0) {
+      alert("remaing money can not be negative 😑")
+      return
+    }
+    if (this.clientId === null) {
+      alert("please add client 😑")
+      return
+    }
+    this.submit()
+
+  }
+
   submit() {
-    console.log(this.paidForm.value)
+    this.cart$.subscribe({
+      next: ({ clientId, discount, details, beneficiaries, deliverDate, delivery, express, isUrgent, netTotal, orderNumber, paid, tax, total }) => {
+        this.order.clientId = clientId,
+          this.order.discount = discount,
+          this.order.oldOrderNumber = orderNumber,
+          this.order.tax = tax,
+          this.order.total = total,
+          this.order.netTotal = netTotal,
+          this.order.paid = paid,
+          this.order.delivery = delivery,
+          this.order.deliverDate = deliverDate,
+          this.order.express = express,
+          this.order.isUrgent = isUrgent,
+          this.order.beneficiaries = beneficiaries,
+          this.order.paymentMethod = this.paidForm.get('paymentMethod').value,
+          details.forEach(detail => {
+            const { productId, serviceId, price, additionAmount, arrangeAmount, arrangeId, additions } = detail?.product;
+            this.order.details.push({
+              productId, serviceId, quantity: detail.quntity, price, total, arrangeId, arrangeAmount, additionAmount, additions
+            })
+          }
+          )
+      }
+    })
+    console.log(this.order);
+
   }
 
   private getDismissReason(reason: any): string {

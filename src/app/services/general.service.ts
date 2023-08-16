@@ -95,6 +95,10 @@ export class GeneralService {
     map(data => data.additionalValue),
   )
 
+  collectionLimit$ = this.getAllSettings$.pipe(
+    map(data => data.collection_Limit)
+  )
+
   listOfAreas$ = this._http.post<PaginationResponse<AddAreaDto>>(`${this.api}/Areas/GetAll`, {
     pageNumber: 1,
     pageSize: 100,

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject } from 'rxjs';
-import { ClientSearchResponse, GetClientBeneficiariesDto } from '../models/client.model';
+import { AddOrderBeneficiaries, ClientSearchResponse, GetClientBeneficiariesDto } from '../models/client.model';
 
 @Injectable({
   providedIn: 'root'
@@ -22,9 +22,9 @@ export class ClientActionService {
     this.#clinetId.next(clientId)
   }
 
-  #clientBeneficiaries = new BehaviorSubject<GetClientBeneficiariesDto[]>([])
+  #clientBeneficiaries = new BehaviorSubject<AddOrderBeneficiaries[]>([])
   clientBeneficiaries$ = this.#clientBeneficiaries.asObservable()
-  setOrderBeneficiaries(beneficiaries: GetClientBeneficiariesDto[]) {
+  setOrderBeneficiaries(beneficiaries: AddOrderBeneficiaries[]) {
     this.#clientBeneficiaries.next(beneficiaries)
   }
 

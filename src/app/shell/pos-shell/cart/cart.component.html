@@ -87,8 +87,9 @@
       <div class="form-check form-switch">
         <input class="form-check-input"
           [checked]="(express$ | async)?.expressValue == expressEnum.URGENT"
+          name="express"
           (click)="changeExpressUrgent(urgent, $any($event.target).checked)"
-          type="checkbox" role="switch">
+          type="radio" role="switch">
       </div>
     </span>
     <span class="express bg-warning p-1 rounded">
@@ -96,27 +97,35 @@
       <div class="d-flex justify-content-center gap-1">
 
         <ng-container *ngIf="express1$ | async as express1">
-          <input type="radio" name="express"   class="form-check-input" id="ex1"
-            (click)="changeExpress(express1)">
-          <label for="ex1">1</label>
+          <div class="form-group p-1 bg-light rounded">
+            <input type="radio" name="express" class="form-check-input" id="ex1"
+              (click)="changeExpress(express1)">
+            <label class for="ex1">1</label>
+          </div>
         </ng-container>
 
         <ng-container *ngIf="express2$ | async as express2">
-          <input type="radio" name="express"   class="form-check-input" id="ex2"
-            (click)="changeExpress(express2)">
-          <label for="ex2">2</label>
+          <div class="for-group p-1 bg-light rounded">
+            <input type="radio" name="express" class="form-check-input" id="ex2"
+              (click)="changeExpress(express2)">
+            <label for="ex2">2</label>
+          </div>
         </ng-container>
 
         <ng-container *ngIf="express3$ | async as express3">
-          <input type="radio" name="express"   class="form-check-input" id="ex3"
-            (click)="changeExpress(express3)">
-          <label for="ex3">3</label>
+          <div class="form-group p-1 bg-light rounded">
+            <input type="radio" name="express" class="form-check-input" id="ex3"
+              (click)="changeExpress(express3)">
+            <label for="ex3">3</label>
+          </div>
         </ng-container>
 
         <ng-container *ngIf="normalExpress$ | async as normal ">
-          <input type="radio" name="express"   class="form-check-input" id="cls"
-            (click)="clearExpress(normal)">
-          <label for="cls">cls</label>
+          <div class="form-group p-1 bg-light rounded">
+            <input type="radio" name="express" class="form-check-input" id="cls"
+              (click)="clearExpress(normal)">
+            <label for="cls">clear</label>
+          </div>
         </ng-container>
 
       </div>
@@ -124,15 +133,24 @@
     <span class="discount bg-warning p-1 rounded">
       <small class="text-muted fw-bold">discount</small>
       <div class="d-flex justify-content-center gap-1">
-        <input type="radio" name="express" class="form-check-input" id="ds1"
-          (click)="changePercentageDiscount(10)">
-        <label for="ds1">10%</label>
-        <input type="radio" name="express" class="form-check-input" id="ds2"
-          (click)="changePercentageDiscount(20)">
-        <label for="ds2">20%</label>
-        <input type="radio" name="express" (click)="clearDiscount()"
-          class="form-check-input" id="cls">
-        <label for="cls">cls</label>
+        <div class="form-group p-1 bg-light rounded">
+          <input type="radio" name="discount" class="form-check-input" id="ds1"
+            (click)="changePercentageDiscount(10)">
+          <label for="ds1">10%</label>
+        </div>
+
+        <div class="form-group p-1 bg-light rounded">
+          <input type="radio" name="discount" class="form-check-input" id="ds2"
+            (click)="changePercentageDiscount(20)">
+          <label for="ds2">20%</label>
+        </div>
+
+        <div class="form-group p-1 bg-light rounded">
+          <input type="radio" name="discount" (click)="clearDiscount()"
+            class="form-check-input" id="cls">
+          <label for="cls">clear</label>
+        </div>
+
       </div>
     </span>
     <span class="d-flex flex-column p-1">
@@ -151,7 +169,8 @@
     <div>
       <input type="datetime-local" class="form-control"
         [(ngModel)]="dateDelivery"
-        [value]="getDelivryDate(deliveryDate$ | async)">
+        [value]="getDelivryDate(deliveryDate$ | async)"
+        (change)="changeDeliveryDate($any($event.target).value)">
     </div>
     <div>
       <div class="form-check">
@@ -199,7 +218,7 @@
     </div>
   </div>
   <hr>
-  <div class="paid row" [formGroup]="paidForm" >
+  <div class="paid row" [formGroup]="paidForm">
     <div class="col-lg-4">
       <small class="text-muted fw-bold">paid</small>
       <input type="number" formControlName="paid" class="form-control"
@@ -209,23 +228,28 @@
       <small class="text-muted fw-bold">payment method</small>
       <div class="d-flex flex-column">
         <div class="form-check form-check-inline">
-          <input class="form-check-input" (change)="checkPaymentMethod()" formControlName="paymentMethod"  [value]="paymentEnum.Visa" type="radio"  id="visa">
+          <input class="form-check-input" (change)="checkPaymentMethod()"
+            formControlName="paymentMethod" [value]="paymentEnum.Visa"
+            type="radio" id="visa">
           <label class="form-check-label" for="visa">Visa</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" (change)="checkPaymentMethod()" formControlName="paymentMethod" [value]="paymentEnum.Cash"
+          <input class="form-check-input" (change)="checkPaymentMethod()"
+            formControlName="paymentMethod" [value]="paymentEnum.Cash"
             type="radio" id="cash">
           <label class="form-check-label" for="cash">Cash</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" (change)="checkPaymentMethod()" formControlName="paymentMethod" [value]="paymentEnum.Balance"
+          <input class="form-check-input" (change)="checkPaymentMethod()"
+            formControlName="paymentMethod" [value]="paymentEnum.Balance"
             type="radio" id="banalce">
           <label class="form-check-label" for="banalce">Balance</label>
         </div>
       </div>
     </div>
     <div class="col-lg-4">
-      <button class="btn btn-outline-warning" (click)="submit()" >Submit</button>
+      <button class="btn btn-outline-warning"
+        [disabled]="!(cart$ | async) && !noSubmit" (click)="checkForSubmit()">Submit</button>
     </div>
   </div>
 </div>
