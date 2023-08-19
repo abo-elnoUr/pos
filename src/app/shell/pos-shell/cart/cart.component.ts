@@ -8,7 +8,7 @@ import { GeneralService } from 'src/app/services/general.service';
 import { PriceActionService } from 'src/app/services/price-action.service';
 import { Express } from '../../../models/product.model';
 import { tap } from 'rxjs';
-import { FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { AddOrderDto, PaymentMethod } from 'src/app/models/order.model';
 import { ClientActionService } from 'src/app/services/client-action.service';
 
@@ -44,6 +44,7 @@ export class CartComponent {
   expressUrgent$ = this.#priceAction.expressUrgent$
   normalExpress$ = this.#priceAction.expressNormal$.pipe(
     tap(express => this.normalExpressValue = express),
+    tap(express => this.#priceAction.setExpress(express)),
     tap(express => this.#priceAction.setDeliveryDate(express.expressDate))
   )
   express$ = this.#priceAction.express$
@@ -62,7 +63,7 @@ export class CartComponent {
   closeResult = ""
   paymentEnum = PaymentMethod
   paidForm = new FormGroup({
-    paid: new FormControl(0),
+    paid: new FormControl({ value: 0, disabled: true }, [Validators.required, Validators.min(0), this.nonNegativeNumberValidator()]),
     paymentMethod: new FormControl(PaymentMethod.Cash)
   })
   cart$ = this.#cartAction.cart$
@@ -94,6 +95,17 @@ export class CartComponent {
     this.checkPaymentMethod()
   }
 
+  nonNegativeNumberValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const value = control.value;
+      if (value < 0) {
+        return { negativeNumber: true };
+      }
+      return null;
+    };
+  }
+
+
 
   increaseQuantity(item: CartItem) {
     this.#cartAction.updateCart(item.product, ++item.quntity)
@@ -101,7 +113,7 @@ export class CartComponent {
 
   decreaseQuantity(item: CartItem) {
     this.#cartAction.updateCart(item.product, --item.quntity)
-    if(item.quntity == 0) {
+    if (item.quntity == 0) {
       this.#cartAction.deleteFromCart(item.product)
     }
 
@@ -131,24 +143,30 @@ export class CartComponent {
   }
 
   getPaidAmount(amount: number) {
-    if (+amount > 0) {
+    if (+amount >= 0) {
       this.#priceAction.setPaid(+amount)
     }
   }
 
   changePercentageDiscount(amount: number) {
-    if (+amount > 0) {
+    if (+amount >= 0) {
       this.#priceAction.setDiscountFixed(0)
       this.fixedDiscount = 0
       this.#priceAction.setDiscount(+amount)
+    } else {
+      alert("discount must be positive number")
+      this.percentDiscount = 0
     }
   }
 
   changeFixedDiscount(amount: number) {
-    if (+amount > 0) {
+    if (+amount >= 0) {
       this.#priceAction.setDiscount(0)
       this.percentDiscount = 0
       this.#priceAction.setDiscountFixed(+amount)
+    } else {
+      alert("discount must be positive number")
+      this.fixedDiscount = 0
     }
   }
 
@@ -178,19 +196,22 @@ export class CartComponent {
 
   clearExpress(express: Express) {
     this.#priceAction.setExpress(express)
+    this.#priceAction.setDeliveryDate(express.expressDate)
   }
 
-  getDelivryDate(date: number) {
+  setDelivryDate(date: number) {
     this.date = new Date(Date.now() + date * (60 * 60 * 1000)).toISOString().slice(0, 16)
-    this.#priceAction.setDeliveryDate(date)
+    this.#deliveryAction.changeDeliverDate(this.date)
     this.dateDelivery = this.date
     return this.date
   }
 
   changeDeliveryDate(d: string) {
     let dd = new Date(d)
-    let date = Math.floor(dd.getTime() / (60 * 60 * 1000))
-    this.#deliveryAction.changeDeliverDate(d)
+    let diff = (dd.getTime() - new Date().getTime()) / 1000
+    diff /= 60 * 60
+    diff = Math.abs(Math.round(diff))
+    this.#priceAction.setDeliveryDate(diff)
   }
 
   clearDeliveryData() {
@@ -199,24 +220,6 @@ export class CartComponent {
     this.#deliveryAction.setDeliveryAmount(0)
   }
 
-  openDelivery(content: any, delivery?: boolean) {
-    if (!delivery) {
-      this.clearDeliveryData()
-    }
-    this.modalService
-      .open(content, { ariaLabelledBy: "modal-basic-title", centered: true })
-      .result.then(
-        (result) => {
-          this.closeResult = `Closed with: ${result}`;
-        },
-        (reason) => {
-          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-        }
-      );
-  }
-
-
-
   checkPaymentMethod() {
     let paymentType = this.paidForm.get('paymentMethod').value
     if (paymentType == PaymentMethod.Balance) {
@@ -224,6 +227,7 @@ export class CartComponent {
       this.paidForm.get('paid').disable()
     }
     else if (paymentType == PaymentMethod.Cash || paymentType == PaymentMethod.Visa) {
+      this.paidForm.get('paid').enable()
       this.#clientAction.clientForInvoice$.subscribe({ next: client => this.clientBalance = client ? client.balance : 0 })
       this.#general.collectionLimit$.subscribe(limit => {
         this.collectionLimit = limit
@@ -235,20 +239,17 @@ export class CartComponent {
       } else {
         this.noSubmit = false
       }
-
     } else {
       this.paidForm.get('paid').enable()
     }
   }
 
   checkForSubmit() {
-
     this.#clientAction.clientId$.subscribe({
       next: (id) => {
         this.clientId = id
       }
     })
-
     this.remaining$.subscribe({
       next: (remaining) => {
         this.remainigMoney = remaining
@@ -270,6 +271,7 @@ export class CartComponent {
   }
 
   submit() {
+    this.#cartAction.click.next(true)
     this.cart$.subscribe({
       next: ({ clientId, discount, details, beneficiaries, deliverDate, delivery, express, isUrgent, netTotal, orderNumber, paid, tax, total }) => {
         this.order.clientId = clientId,
@@ -292,10 +294,32 @@ export class CartComponent {
             })
           }
           )
+        this.#cartAction.click.next(false)
+      }
+
+    })
+
+    this.#general.createOrder(this.order).subscribe({
+      next: (res) => {
+        alert(`order created successfully 😊 `)
       }
     })
-    console.log(this.order);
+  }
 
+  openDelivery(content: any, delivery?: boolean) {
+    if (!delivery) {
+      this.clearDeliveryData()
+    }
+    this.modalService
+      .open(content, { ariaLabelledBy: "modal-basic-title", centered: true })
+      .result.then(
+        (result) => {
+          this.closeResult = `Closed with: ${result}`;
+        },
+        (reason) => {
+          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+        }
+      );
   }
 
   private getDismissReason(reason: any): string {

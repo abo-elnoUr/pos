@@ -116,7 +116,7 @@ export class CartActionService {
     this.totalItem$,
     this._priceAction.express$
   ]).pipe(
-    map(([total, express]) => Math.round(total * express?.price) - total),
+    map(([total, express]) => Math.round(total * express?.price) - total) ,
     shareReplay(1)
   )
 
@@ -162,6 +162,9 @@ export class CartActionService {
     shareReplay(1)
   )
 
+  click = new BehaviorSubject<boolean>(false)
+
+
 
   cart$ = combineLatest({
     clientId: this._clientAction.clientId$,
@@ -177,7 +180,11 @@ export class CartActionService {
     tax: this.tax$,
     discount: this.discount$,
     netTotal: this.netTotal$,
-  }).pipe(take(1))
+    click : this.click
+  }).pipe(
+    filter( ({click} ) => click  ),
+    take(1)
+    )
 
 
 }

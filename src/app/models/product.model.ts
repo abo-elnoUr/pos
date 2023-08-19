@@ -40,7 +40,7 @@ export enum expressEnum { NORMAL, URGENT, EXPRESS1, EXPRESS2, EXPRESS3 }
 export interface Express {
   expressValue: expressEnum;
   expressDate: number;
-  price: number;
+  price: number | 0;
 }
 
 

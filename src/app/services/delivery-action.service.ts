@@ -31,12 +31,17 @@ export class DeliveryActionService {
     areaId: this.areaId$,
     address: this.address$,
     deliveryAmount: this.deliveryAmount$
-  })
+  }).pipe(
+    map(({areaId, address, deliveryAmount}) => {
+      if(!(areaId && address && deliveryAmount) )
+      return null
+    })
+  )
 
-  private deliverDate = new BehaviorSubject<string>('');
-  deliverDate$ = this.deliverDate.asObservable();
+  private deliverDate = new BehaviorSubject<string>('')
+  deliverDate$ = this.deliverDate.asObservable()
   changeDeliverDate(date: string) {
-    this.deliverDate.next(date);
+    this.deliverDate.next(date)
   }
 
 }
