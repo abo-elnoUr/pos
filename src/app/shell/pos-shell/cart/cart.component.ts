@@ -54,7 +54,6 @@ export class CartComponent {
   express3$ = this.#priceAction.expressExpress3$
   normalExpressValue: Express
   deliveryDate$ = this.#priceAction.deliveryDate$
-  deliveryAmount$ = this.#deliveryAction.deliveryAmount$
   dateDelivery: string
   date: string
   address: string
@@ -143,6 +142,7 @@ export class CartComponent {
     this.#cartAction.deleteFromCart(item.product)
   }
 
+  
   getPaidAmount(amount: number) {
     if (+amount >= 0) {
       this.#priceAction.setPaid(+amount)
@@ -220,9 +220,17 @@ export class CartComponent {
     this.#deliveryAction.setAreaId(null)
     this.#deliveryAction.setDeliveryAmount(0)
   }
-
+  paid: number
   checkPaymentMethod() {
     let paymentType = this.paidForm.get('paymentMethod').value
+    this.paid$.subscribe({
+      next: (res) => {
+        this.paid = res
+      }
+    })
+    if(this.paid > this.remainigMoney) {
+      alert('you can not paid more than remaaining')
+    }
     if (paymentType == PaymentMethod.Balance) {
       this.paidForm.get('paid').setValue(0)
       this.paidForm.get('paid').disable()

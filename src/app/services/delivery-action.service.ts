@@ -32,10 +32,10 @@ export class DeliveryActionService {
     address: this.address$,
     deliveryAmount: this.deliveryAmount$
   }).pipe(
-    map(({areaId, address, deliveryAmount}) => {
-      if(!(areaId && address && deliveryAmount) )
-      return null
-    })
+    // map(({areaId, address, deliveryAmount}) => {
+    //   if(!(areaId && deliveryAmount) )
+    //   return null
+    // })
   )
 
   private deliverDate = new BehaviorSubject<string>('')
