@@ -69,6 +69,7 @@ export class CartComponent {
   cart$ = this.#cartAction.cart$
   order: AddOrderDto
   noSubmit: boolean = false
+  discountPercentage$ = this.#priceAction.discount$
 
   clientBalance: number = 0
   remainigMoney: number = 0

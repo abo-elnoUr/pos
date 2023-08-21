@@ -92,62 +92,62 @@
           type="radio" role="switch">
       </div>
     </span>
-    <span class="express  rounded">
+    <span class="express p-1">
       <small class="text-muted fw-bold">express</small>
       <div class="d-flex justify-content-center gap-1">
 
         <ng-container *ngIf="express1$ | async as express1">
-          <div class="form-group p-1 bg-dark rounded" (click)="changeExpress(express1)">
-            <input type="radio" [hidden]="true" name="express" class="form-check-input" id="ex1"
+          <div  [class]="(express$ | async).expressValue == express1.expressValue  ?  'setStyle' : ' ' " class="form-group p-1 text-light rounded border" (click)="changeExpress(express1)">
+            <input type="radio" [hidden]="true"  name="express" [value]="express1.expressValue" [checked]="(express$ | async).expressValue == express1.expressValue" class="form-check-input" id="ex1"
             (click)="changeExpress(express1)"
               >
-            <label class for="ex1" class="px-2 rounded text-light"  style="cursor: pointer;">1</label>
+            <label  for="ex1" [class]="(express$ | async).expressValue == express1.expressValue  ?  'setStyle' : ' ' " class="px-2 rounded text-dark"  style="cursor: pointer;">1</label>
           </div>
         </ng-container>
 
         <ng-container *ngIf="express2$ | async as express2">
-          <div class="for-group p-1 bg-dark rounded">
-            <input type="radio" [hidden]="true" name="express" class="form-check-input" id="ex2"
+          <div  [class]="(express$ | async).expressValue == express2.expressValue  ?  'setStyle' : ' ' " class="form-group p-1 text-light rounded border">
+            <input type="radio" [hidden]="true"  name="express" [value]="express2.expressValue" [checked]="(express$ | async).expressValue == express2.expressValue" class="form-check-input" id="ex2"
               (click)="changeExpress(express2)">
-            <label for="ex2" class="px-2 rounded text-light" style="cursor: pointer;" >2</label>
+            <label  [class]="(express$ | async).expressValue == express2.expressValue  ?  'setStyle' : ' ' " for="ex2" class="px-2 rounded text-dark" style="cursor: pointer;" >2</label>
           </div>
         </ng-container>
 
         <ng-container *ngIf="express3$ | async as express3">
-          <div class="form-group p-1 bg-dark rounded">
-            <input type="radio" [hidden]="true" name="express" class="form-check-input" id="ex3"
+          <div [class]="(express$ | async).expressValue == express3.expressValue  ?  'setStyle' : ' ' "  class="form-group p-1 text-light rounded border">
+            <input  type="radio"  [hidden]="true" name="express" [value]="express3.expressValue" [checked]="(express$ | async).expressValue == express3.expressValue" class="form-check-input" id="ex3"
               (click)="changeExpress(express3)">
-            <label for="ex3" class="px-2 rounded text-light" style="cursor: pointer;" >3</label>
+            <label [class]="(express$ | async).expressValue == express3.expressValue  ?  'setStyle' : ' ' "  for="ex3" class="px-2 rounded text-dark" style="cursor: pointer;" >3</label>
           </div>
         </ng-container>
 
         <ng-container *ngIf="normalExpress$ | async as normal ">
-          <button class="btn btn-sm bg-dark text-light" (click)="clearExpress(normal)">clear</button>
+          <button class="btn btn-sm btn-outline-dark " (click)="clearExpress(normal)">cls</button>
         </ng-container>
 
       </div>
     </span>
-    <span class="discount bg-warning p-1 rounded">
+    <span class="discount p-1">
       <small class="text-muted fw-bold">discount</small>
       <div class="d-flex justify-content-center gap-1">
-        <div class="form-group p-1 bg-light rounded">
-          <input type="radio" name="discount" class="form-check-input" id="ds1"
+        <div  [class]="(discountPercentage$ | async) == 10 ?  'setStyle' : ' '"  class="p-1 text-light rounded border">
+          <input [hidden]="true" type="radio" [checked]="(discountPercentage$ | async) === 10 ?  'setStyle' : ' '" name="discount"  id="ds1"
             (click)="changePercentageDiscount(10)">
-          <label for="ds1">10%</label>
+          <label class="px-1 rounded text-dark" [class]="(discountPercentage$ | async) === 10 ?  'setStyle' : ' '" style="cursor: pointer;" for="ds1">10%</label>
         </div>
 
-        <div class="form-group p-1 bg-light rounded">
-            <input type="radio" name="discount" class="form-check-input" id="ds2"
+        <div  [class]="(discountPercentage$ | async) == 20 ?  'setStyle' : ' '"  class="p-1 text-light rounded border">
+            <input [hidden]="true" type="radio" [checked]="(discountPercentage$ | async) === 20 ?  'setStyle' : ' '" name="discount" id="ds2"
             (click)="changePercentageDiscount(20)">
-            <label for="ds2">20%</label>
+            <label class="px-1 rounded text-dark" [class]="(discountPercentage$ | async) === 20 ?  'setStyle' : ' '" style="cursor: pointer;" for="ds2">20%</label>
         </div>
 
-        <button class="btn btn-sm btn-light" (click)="clearDiscount()">clear</button>
+        <button class="btn btn-sm btn-outline-dark" (click)="clearDiscount()">cls</button>
 
       </div>
     </span>
     <span class="d-flex flex-column p-1">
-      <small class="text-muted fw-bold">discount(%)</small>
+      <small class="text-muted fw-bold ">discount(%)</small>
       <input type="number" [(ngModel)]="percentDiscount" class="form-control"
         (input)="changePercentageDiscount($any($event.target).value)">
     </span>
